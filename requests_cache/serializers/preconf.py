@@ -78,24 +78,15 @@ except ImportError as e:
 
 
 # BSON/MongoDB document serializers
-def _get_bson_functions():
-    """Handle different function names between pymongo's bson and standalone bson"""
-    try:
-        import pymongo  # noqa: F401
-
-        return {'dumps': 'encode', 'loads': 'decode'}
-    except ImportError:
-        return {'dumps': 'dumps', 'loads': 'loads'}
-
-
 try:
     import bson
+    import pymongo  # noqa: F401
 
     bson_serializer = SerializerPipeline(
-        [bson_preconf_stage, Stage(bson, **_get_bson_functions())],
+        [bson_preconf_stage, Stage(bson, dumps='encode', loads='decode')],
         name='bson',
         is_binary=True,
-    )  #: Complete BSON serializer; uses pymongo's ``bson`` if installed, otherwise standalone ``bson`` codec
+    )  #: Complete BSON serializer using pymongo's ``bson`` module
     bson_document_serializer = SerializerPipeline(
         [bson_preconf_stage],
         name='bson_document',
